@@ -25,8 +25,8 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 	
 	protected SurfaceHolder holder;
 	protected Bitmap bitmap;
-	public static Canvas canvas; // for debugging raycasts
-	public static Paint paint = new Paint(); // debug
+	protected Canvas canvas; // for debugging raycasts
+	protected Paint paint = new Paint(); // debug
 	protected int screenHeight, screenWidth;
 	protected GameEngine engine;
 	
@@ -70,7 +70,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 				drawPaddle();
 				drawBlocks();
 				engine.moveBall(bitmap);
-				//drawBall();
+				drawBall();
 				drawTextDecorations();
 				lockDrawAndPost();
 				t1 = System.currentTimeMillis();

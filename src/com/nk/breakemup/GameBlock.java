@@ -43,7 +43,26 @@ public abstract class GameBlock implements Collidable{
 	public Rect getBoundingRect(){
 		int posX = (int)position.x;
 		int posY = (int)position.y;
-		return new Rect(posX, posY, posX + (int)size.x, posY + (int)size.y);
+		return new Rect(posX + 2, posY + 2, posX + (int)size.x - 2, posY + (int)size.y - 2);
+	}
+	
+	public Vector2 getMovementInversionMask(Vector2 point){
+		point.sub(position);
+		float treshold = 2;
+		if (Vector2.distance(point, Vector2.zero) < treshold ||
+			Vector2.distance(point, size) < treshold ||
+			Vector2.distance(point, new Vector2(0, size.y)) < treshold ||
+			Vector2.distance(point, new Vector2(size.x, 0)) < treshold){
+			return Vector2.upLeft;
+		}
+		else {
+			if (point.x < treshold || point.y > size.x - treshold){
+				return Vector2.downLeft;
+			}
+			else {
+				return Vector2.upRight;
+			}
+		}
 	}
 	
 	@Override

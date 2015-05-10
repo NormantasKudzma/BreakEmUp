@@ -40,8 +40,8 @@ public class GameEngine {
 	public void createPaddle(){
 		float midPoint = screenWidth / 2;
 		paddle = new Paddle();
-		paddle.setSize(new Vector2(screenWidth / 4.8f, screenHeight * 0.045f));
-		paddle.setPosition(new Vector2(midPoint - paddle.getSize().x / 2, screenHeight * 0.91f));
+		paddle.setSize(new Vector2((int)(screenWidth / 4.8f), (int)(screenHeight * 0.045f)));
+		paddle.setPosition(new Vector2(midPoint - paddle.getSize().x / 2, (int)(screenHeight * 0.91f)));
 		paddle.setSpeed(screenWidth / 30);
 		Log.w("nk", "Paddle parameters " + paddle);
 		
@@ -49,7 +49,7 @@ public class GameEngine {
 	}
 	
 	public void createBlocks(){
-		Vector2 blockSz = new Vector2(screenWidth * 0.75f / blocksPerRow, screenHeight * 0.26f / (numBlocks / blocksPerRow));
+		Vector2 blockSz = new Vector2((int)(screenWidth * 0.75f / blocksPerRow), (int)(screenHeight * 0.26f / (numBlocks / blocksPerRow)));
 		float spacingH = screenWidth * 0.15f / (blocksPerRow - 1);
 		float spacingV = screenHeight * 0.1f / (numBlocks / blocksPerRow);
 		for (int i = 0; i < numBlocks; i++){
@@ -70,7 +70,7 @@ public class GameEngine {
 		float midPoint = screenWidth / 2;
 		ball = new Ball();
 		ball.setRadius(screenHeight * 0.025f);
-		ball.setSpeed(screenWidth / 40);
+		ball.setSpeed(screenWidth / 25);
 		ball.setPosition(new Vector2(midPoint, screenHeight * 0.8f));
 		
 		Random rnd = new Random();
@@ -113,6 +113,7 @@ public class GameEngine {
 		Vector2 [] hotspots = ball.getHotspots();
 		float dist = ball.getSpeed() * ball.getSpeed();
 		Vector2 closestColl = null;
+		GameBlock closestObj = null;
 		for (Vector2 hs : hotspots){
 			Collision c = raycast(bitmap, hs, ball.getMovementDirection(), ball.getSpeed());
 			if (c.hasCollided()){
@@ -124,6 +125,7 @@ public class GameEngine {
 				}
 				if (obj != null){
 					obj.hit(this);
+					closestObj = obj;
 				}
 			}
 		}
@@ -141,22 +143,15 @@ public class GameEngine {
 				ball.flipMovementDirectionY();
 				return;
 			}
-
-			int x = (int)closestColl.x, y = (int)closestColl.y;
-			int empty = 0xff000000;
-			
-			if (bitmap.getPixel(x, y + 1) != empty && bitmap.getPixel(x, y - 1) != empty){
-				ball.flipMovementDirectionX();
-				return;
+			if (closestObj != null){
+				Vector2 imask = closestObj.getMovementInversionMask(closestColl);
+				Vector2 dir = ball.getMovementDirection();
+				dir.x *= imask.x;
+				dir.y *= imask.y;
 			}
-			if (bitmap.getPixel(x + 1, y) != empty && bitmap.getPixel(x - 1, y) != empty){
-				ball.flipMovementDirectionY();
-				return;
+			else {
+				Log.w("nk", "Incorrect collision?");
 			}
-			
-			ball.flipMovementDirectionX();
-			ball.flipMovementDirectionY();
-			return;
 		}
 	}
 	
@@ -223,8 +218,6 @@ public class GameEngine {
 				break;
 			}
 		}
-		GameView.paint.setColor(Color.WHITE);
-		GameView.canvas.drawLine(origin.x, origin.y, currentPoint.x, currentPoint.y, GameView.paint);
 		return col;
 	}
 

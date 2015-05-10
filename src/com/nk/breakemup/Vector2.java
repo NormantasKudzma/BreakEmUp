@@ -7,6 +7,10 @@ public class Vector2 {
 	public static final Vector2 down = new Vector2(0, 1);
 	public static final Vector2 zero = new Vector2(0, 0);
 	
+	public static final Vector2 upLeft = new Vector2(-1, -1);
+	public static final Vector2 downLeft = new Vector2(-1, 1);
+	public static final Vector2 upRight = new Vector2(1, -1);
+	
 	protected float x, y;
 	
 	public Vector2(){
@@ -29,6 +33,11 @@ public class Vector2 {
 	public void add(Vector2 i){
 		this.x += i.x;
 		this.y += i.y;
+	}
+	
+	public void sub(Vector2 i){
+		this.x -= i.x;
+		this.y -= i.y;
 	}
 	
 	public static Vector2 add(Vector2 i, Vector2 j){
