@@ -69,7 +69,7 @@ public class GameEngine {
 	public void createBall(){
 		float midPoint = screenWidth / 2;
 		ball = new Ball();
-		ball.setRadius(screenHeight * 0.025f);
+		ball.setRadius(screenHeight * 0.018f);
 		ball.setSpeed(screenWidth / 25);
 		ball.setPosition(new Vector2(midPoint, screenHeight * 0.8f));
 		

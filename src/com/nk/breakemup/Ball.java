@@ -26,7 +26,7 @@ public class Ball extends Paddle {
 	public Vector2 [] getHotspots(){
 		Vector2 [] hotspots = new Vector2[4];
 		float radius = getRadius() * 0.9f;
-		float deg2rad90 = GameEngine.deg2rad * 90;
+		float deg2rad90 = GameEngine.deg2rad * 95;
 		for (int i = 0; i < hotspots.length; i++){
 			hotspots[i] = new Vector2((float)Math.cos(i * deg2rad90) * radius, (float)Math.sin(i * deg2rad90) * radius);
 			hotspots[i].add(position);
