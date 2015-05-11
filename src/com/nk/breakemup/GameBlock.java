@@ -3,7 +3,7 @@ package com.nk.breakemup;
 import android.graphics.Rect;
 import android.graphics.RectF;
 
-public abstract class GameBlock implements Collidable{
+public abstract class GameBlock{
 	protected Vector2 size;
 	protected Vector2 position;
 	int color = 0xffffffff;
@@ -65,8 +65,10 @@ public abstract class GameBlock implements Collidable{
 		}
 	}
 	
+	public abstract void hit(GameEngine e);
+	
 	@Override
 	public String toString() {
-		return "Size:" + size + ", Position:" + position + String.format("[Color:%d]", color);
+		return String.format("[Size: %s; Position: %s; Color:%d]", size, position, color);
 	}
 }

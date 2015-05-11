@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.util.Log;
 
 public class GameEngine {
@@ -16,14 +15,18 @@ public class GameEngine {
 	
 	protected Ball ball;
 	protected Paddle paddle;
-	protected ArrayList<Block> blocks = new ArrayList<Block>();
-	protected ArrayList<GameBlock> colliders = new ArrayList<GameBlock>();
+	protected ArrayList<Block> blocks;
+	protected ArrayList<GameBlock> colliders;
 	
 	protected int numBlocks = 28;
 	protected int blocksPerRow = 7;
 	
 	protected int score = 0;
+	protected int bonusLivePts = 0;
 	protected int lives = 2;
+	protected int level = 0;
+	protected boolean levelCompleted = false;
+	protected boolean gameOver = false;
 	
 	public GameEngine(int screenWidth, int screenHeight){
 		this.screenWidth = screenWidth;
@@ -32,46 +35,75 @@ public class GameEngine {
 		xmax = this.screenWidth - xmin;
 		ymax = this.screenHeight - ymin;
 		
-		createPaddle();
+		startNewLevel();
+	}
+	
+	public void startNewLevel(){
+		level++;
+		colliders = new ArrayList<GameBlock>();
 		createBlocks();
+		resetLevelVariables();
+	}
+	
+	public void resetLevelVariables(){
+		levelCompleted = false;
+		gameOver = false;
+		
+		if (paddle != null){
+			colliders.remove(paddle);
+		}
+		
+		createPaddle();
 		createBall();
 	}
 	
+	// Create paddle in the lower middle of the screen
+	// Paddle's speed is dependent on screen width and level
 	public void createPaddle(){
 		float midPoint = screenWidth / 2;
 		paddle = new Paddle();
-		paddle.setSize(new Vector2((int)(screenWidth / 4.8f), (int)(screenHeight * 0.045f)));
+		paddle.setSize(new Vector2((int)(screenWidth / 4.8f), (int)(screenHeight * 0.028f)));
 		paddle.setPosition(new Vector2(midPoint - paddle.getSize().x / 2, (int)(screenHeight * 0.91f)));
-		paddle.setSpeed(screenWidth / 30);
+		paddle.setSpeed(screenWidth * 0.035f + level * 0.8f);
 		Log.w("nk", "Paddle parameters " + paddle);
 		
 		colliders.add(paddle);
 	}
 	
+	// Create and place blocks
+	// Block point value is dependent on level and row in which it is placed
 	public void createBlocks(){
+		blocks = new ArrayList<Block>();
 		Vector2 blockSz = new Vector2((int)(screenWidth * 0.75f / blocksPerRow), (int)(screenHeight * 0.26f / (numBlocks / blocksPerRow)));
+		int numRows = numBlocks / blocksPerRow;
+		int points = Block.BASE_POINTS * level;
 		float spacingH = screenWidth * 0.15f / (blocksPerRow - 1);
-		float spacingV = screenHeight * 0.1f / (numBlocks / blocksPerRow);
+		float spacingV = screenHeight * 0.1f / (numRows);
+		
 		for (int i = 0; i < numBlocks; i++){
-			int clr = Block.rowColors[(int)(i / blocksPerRow)];
+			int row = (int)(i / blocksPerRow);
+			int clr = Block.ROW_COLORS[row];
 			Vector2 pos = new Vector2(0.05f * screenWidth + (i % blocksPerRow) * (blockSz.x + Math.signum((i % blocksPerRow)) * spacingH),
-									  0.05f * screenHeight + (int)(i / blocksPerRow) * (blockSz.y + spacingV));
+									  0.05f * screenHeight + row * (blockSz.y + spacingV));
 			Block b = new Block();
 			b.setColor(clr);
 			b.setSize(blockSz);
 			b.setPosition(pos);
+			b.setPoints(points + (numRows - row) * 10);
 			blocks.add(b);
 			colliders.add(b);
 			Log.w("nk", "New block " + b);
 		}
 	}
 	
+	// Create ball and assign a random movement direction to it
+	// Ball's movement speed is dependent on level
 	public void createBall(){
 		float midPoint = screenWidth / 2;
 		ball = new Ball();
 		ball.setRadius(screenHeight * 0.018f);
-		ball.setSpeed(screenWidth / 25);
-		ball.setPosition(new Vector2(midPoint, screenHeight * 0.8f));
+		ball.setSpeed(screenWidth * 0.021f + level * 4);
+		ball.setPosition(new Vector2(midPoint, screenHeight * 0.86f));
 		
 		Random rnd = new Random();
 		float angle = (rnd.nextInt(90) + 45) * deg2rad;
@@ -104,6 +136,22 @@ public class GameEngine {
 				pos.x = screenWidth - 1 - paddleWidth;
 			}
 		}
+	}
+	
+	public boolean isGameOver(){
+		return gameOver;
+	}
+	
+	public void isGameOver(boolean isGameOver){
+		this.gameOver = isGameOver;
+	}
+	
+	public boolean isLevelComplete(){
+		return levelCompleted;
+	}
+	
+	public void checkLevelComplete(){
+		gameOver = levelCompleted = blocks.isEmpty();
 	}
 	
 	// Checks for collisions in ball's path, 
@@ -139,7 +187,12 @@ public class GameEngine {
 				ball.flipMovementDirectionX();
 				return;
 			}
-			if (closestColl.y <= ymin || closestColl.y >= ymax){
+			if (closestColl.y >= ymax){
+				lives--;
+				gameOver = true;
+				return;
+			}
+			if (closestColl.y <= ymin){
 				ball.flipMovementDirectionY();
 				return;
 			}
@@ -173,6 +226,12 @@ public class GameEngine {
 	
 	public void addScore(int amount){
 		score += amount;
+		
+		int scoreForBonusLive = 10_000;
+		if (score > bonusLivePts + scoreForBonusLive){
+			lives++;
+			bonusLivePts += scoreForBonusLive;
+		}
 	}
 	
 	public int getScore(){
@@ -181,6 +240,10 @@ public class GameEngine {
 	
 	public int getLives(){
 		return lives;
+	}
+	
+	public int getLevel(){
+		return level;
 	}
 	
 	// Draw a ray from origin towards direction, ray stops if it hits

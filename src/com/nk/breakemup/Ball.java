@@ -1,7 +1,5 @@
 package com.nk.breakemup;
 
-import android.graphics.RectF;
-import android.util.Log;
 
 public class Ball extends Paddle {
 	protected Vector2 movementDirection = Vector2.zero;

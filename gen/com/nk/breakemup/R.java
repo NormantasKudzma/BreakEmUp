@@ -14,7 +14,8 @@ public final class R {
         public static final int ic_launcher=0x7f020000;
     }
     public static final class id {
-        public static final int buttonStart=0x7f060003;
+        public static final int buttonStart=0x7f060004;
+        public static final int gameTitle=0x7f060003;
         public static final int gameView=0x7f060001;
         public static final int game_layout=0x7f060000;
         public static final int menu_layout=0x7f060002;
